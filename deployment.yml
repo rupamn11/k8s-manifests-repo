@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: javapp-deployment
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchlabels:
+      app: javapp
+  templete:
+    metadata:
+      labels:
+        app: javapp
+    spec:
+      containers:
+        - name: javapp
+          image: rupamn11/javapp:v1
+          ports:
+            - containerPort: 8080
