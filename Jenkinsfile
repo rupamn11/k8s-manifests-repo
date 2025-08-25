@@ -101,9 +101,9 @@ pipeline{
                   git push origin main
                 """
               }
-            } 
-          }
+           } 
         }
+    }
          stage('Docker Image Scan: trivy '){
          when { expression {  params.action == 'create' } }
             steps{
