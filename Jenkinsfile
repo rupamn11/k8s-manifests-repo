@@ -82,6 +82,28 @@ pipeline{
                }
             }
         }
+	stage('Update K8s Manifest Repo for ArgoCD') {
+          when { expression { params.action == 'create' } }
+          steps {
+            script {
+              dir('k8s-manifests-repo') {
+                git credentialsId: 'github-creds', branch: 'main', url: 'https://github.com/rupamn11/k8s-manifests-repo.git'
+        
+                sh """
+                  sed -i 's|image: ${params.DockerHubUser}/${params.ImageName}:.*|image: ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}|' deployment.yaml
+                """
+
+                sh """
+                  git config user.email "rupamnimje147@gmail.com"
+                  git config user.name "rupamn11"
+                  git add deployment.yaml
+                  git commit -m "Update image to ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}"
+                  git push origin main
+                """
+              }
+            } 
+          }
+        }
          stage('Docker Image Scan: trivy '){
          when { expression {  params.action == 'create' } }
             steps{
@@ -100,14 +122,14 @@ pipeline{
                }
             }
         }   
-        stage('Docker Image Cleanup : DockerHub '){
-         when { expression {  params.action == 'create' } }
-            steps{
-               script{
-                   
-                   dockerImageCleanup("${params.ImageName}","${params.ImageTag}","${params.DockerHubUser}")
-               }
-            }
-        }      
+//        stage('Docker Image Cleanup : DockerHub '){
+  //       when { expression {  params.action == 'create' } }
+    //        steps{
+      //         script{
+      //           
+      //         dockerImageCleanup("${params.ImageName}","${params.ImageTag}","${params.DockerHubUser}")
+//             }
+//          }
+//      }      
     }
 }
